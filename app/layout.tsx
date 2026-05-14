@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Roboto, Montserrat } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -21,6 +21,16 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
   weight: ["600", "700", "800", "900"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#E3000F" },
+    { media: "(prefers-color-scheme: dark)",  color: "#B00009" },
+  ],
+};
 
 export const metadata: Metadata = {
   title: "MTS Trucking Incorporated — Fleet, Trip & Payroll Management",
