@@ -173,27 +173,6 @@ export default function PodCapturePage() {
               </div>
             )}
           </div>
-                <Camera className="w-8 h-8 text-teal-500 mx-auto mb-2" />
-                <p className="font-semibold text-sm text-[#0B1C2E]">Tap to take / upload photos</p>
-                <p className="text-xs text-gray-400 mt-0.5">JPG, PNG Â· Multiple allowed</p>
-              </div>
-            </label>
-            {photos.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mt-3">
-                {photos.map((p, i) => (
-                  <div key={i} className="relative aspect-square">
-                    <img src={p} alt={`Photo ${i + 1}`} className="rounded-xl w-full h-full object-cover border border-gray-100" />
-                    <button
-                      onClick={() => removePhoto(i)}
-                      className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* Signature */}
           <div className="bg-white border border-gray-100 shadow-sm p-4">

@@ -499,7 +499,7 @@ export {
 } from "./payroll";
 
 // Subcon partners
-export { usePartnerStore } from "./partners";
+export { usePartnerStore, usePartnerRequestStore } from "./partners";
 
 // Helpers (Phase 1)
 export { useHelperStore } from "./helpers";

@@ -5,7 +5,7 @@ import { useAuthStore } from "@/lib/store/auth";
 import { useDriverStore } from "@/lib/store";
 import {
   ChevronRight, LogOut, User, Bell, Shield, Info,
-  HelpCircle, Moon, Smartphone,
+  HelpCircle, Moon, Smartphone, Truck,
 } from "lucide-react";
 import { DriverNav } from "@/components/driver/DriverNav";
 import { DriverSidebar } from "@/components/driver/DriverSidebar";
