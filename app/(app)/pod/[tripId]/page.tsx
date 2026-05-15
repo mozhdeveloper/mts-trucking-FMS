@@ -9,6 +9,7 @@ import { Input, Label, Textarea } from "@/components/ui/input";
 import { useTripStore, usePodStore } from "@/lib/store";
 import { useAuthStore } from "@/lib/store/auth";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Logo } from "@/components/Brand/Logo";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -63,40 +64,61 @@ export default function PodCapturePage() {
   // â”€â”€ Driver mobile view â”€â”€
   if (user?.role === "driver") {
     return (
-      <div className="max-w-sm mx-auto -mt-6 -mx-6 min-h-screen flex flex-col bg-gray-50 sm:mx-auto">
-        {/* Header */}
-        <header className="sticky top-0 z-30 bg-[#0B1C2E] h-14 px-4 flex items-center justify-between shrink-0">
-          <button onClick={() => router.back()} className="w-9 h-9 flex items-center justify-center" aria-label="Back">
-            <ChevronLeft className="w-5 h-5 text-white" />
-          </button>
-          <div className="text-center leading-none">
-            <p className="text-white font-extrabold text-sm tracking-tight">NE<span className="text-teal-400">X</span></p>
-            <p className="text-[8px] tracking-[0.25em] text-teal-400/80 font-semibold">LOGISTICS</p>
+      <div className="min-h-[100dvh] w-full flex flex-col bg-gray-50 overscroll-none">
+
+        {/* Sticky header */}
+        <header
+          className="sticky top-0 z-30 bg-brand-black w-full shrink-0"
+          style={{ paddingTop: "env(safe-area-inset-top)" }}
+        >
+          <div className="max-w-lg mx-auto h-14 px-4 flex items-center justify-between">
+            <button
+              onClick={() => router.back()}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center -ml-2"
+              aria-label="Back"
+            >
+              <ChevronLeft className="w-5 h-5 text-white" />
+            </button>
+            <div className="select-none">
+              <Logo size={32} light showWordmark wordmarkSize="sm" />
+            </div>
+            <div className="min-w-[44px]" />
           </div>
-          <div className="w-9" />
+          <div className="h-[2px] bg-brand-red" />
         </header>
 
-        {/* Title */}
-        <div className="bg-[#0B1C2E] px-5 pb-5 pt-1">
-          <p className="text-white font-bold text-lg">Capture POD</p>
-          <p className="text-xs text-white/50 mt-0.5">{trip.id} Â· {trip.dropoff.address.split(",")[0]}</p>
+        {/* Title banner */}
+        <div
+          className="bg-brand-black px-5 pb-5 pt-3 shrink-0"
+          style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(227,0,15,0.05) 0 1px, transparent 1px 12px)" }}
+        >
+          <div className="max-w-lg mx-auto flex items-center gap-3">
+            <div className="w-10 h-10 bg-brand-red flex items-center justify-center shrink-0">
+              <Camera className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-white font-black text-base font-display uppercase leading-tight">Capture POD</p>
+              <p className="text-xs text-white/40 mt-0.5">{trip.id} &middot; {trip.dropoff.address.split(",")[0]}</p>
+            </div>
+          </div>
         </div>
 
-        {/* Form */}
-        <main className="flex-1 overflow-y-auto px-4 pt-4 space-y-4 pb-32">
+        {/* Scrollable form */}
+        <main className="flex-1 overflow-y-auto overscroll-contain">
+          <div className="max-w-lg mx-auto px-4 pt-4 space-y-4 pb-28">
 
           {/* Receiver info */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-3">
-            <h3 className="font-bold text-sm text-[#0B1C2E]">Receiver Information</h3>
+          <div className="bg-white border border-gray-100 shadow-sm p-4 space-y-4">
+            <h3 className="font-black text-sm text-brand-black font-display uppercase tracking-wide">Receiver Information</h3>
             <div>
               <label className="text-xs text-gray-500 font-medium mb-1.5 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5" /> Receiver Name <span className="text-red-500">*</span>
+                <User className="w-3.5 h-3.5" /> Receiver Name <span className="text-brand-red">*</span>
               </label>
               <input
                 value={receiverName}
                 onChange={(e) => setReceiverName(e.target.value)}
                 placeholder="Juan Dela Cruz"
-                className="w-full h-12 rounded-xl border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300 text-gray-700"
+                className="w-full h-12 border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red/30 text-gray-700 bg-white"
               />
             </div>
             <div>
@@ -107,7 +129,7 @@ export default function PodCapturePage() {
                 value={receiverContact}
                 onChange={(e) => setReceiverContact(e.target.value)}
                 placeholder="+63 917..."
-                className="w-full h-12 rounded-xl border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300 text-gray-700"
+                className="w-full h-12 border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red/30 text-gray-700 bg-white"
               />
             </div>
             <div>
@@ -119,17 +141,38 @@ export default function PodCapturePage() {
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
                 placeholder="Condition of cargo, remarks..."
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300 text-gray-700 resize-none"
+                className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red/30 text-gray-700 resize-none bg-white"
               />
             </div>
           </div>
 
           {/* Photos */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-            <h3 className="font-bold text-sm text-[#0B1C2E] mb-3">Delivery Photos</h3>
+          <div className="bg-white border border-gray-100 shadow-sm p-4">
+            <h3 className="font-black text-sm text-brand-black font-display uppercase tracking-wide mb-3">Delivery Photos</h3>
             <label className="cursor-pointer block">
               <input type="file" multiple accept="image/*" capture="environment" className="hidden" onChange={handlePhotoUpload} />
-              <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-teal-400 hover:bg-teal-50/30 transition-colors active:scale-[0.99]">
+              <div className="border-2 border-dashed border-gray-200 p-6 text-center hover:border-brand-red hover:bg-brand-red-light/20 transition-colors active:scale-[0.99]">
+                <Camera className="w-8 h-8 text-brand-red mx-auto mb-2" />
+                <p className="font-bold text-sm text-brand-black">Tap to take / upload photos</p>
+                <p className="text-xs text-gray-400 mt-0.5">JPG, PNG &middot; Multiple allowed</p>
+              </div>
+            </label>
+            {photos.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mt-3">
+                {photos.map((p, i) => (
+                  <div key={i} className="relative aspect-square">
+                    <img src={p} alt={`Photo ${i + 1}`} className="w-full h-full object-cover border border-gray-100" />
+                    <button
+                      onClick={() => removePhoto(i)}
+                      className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-brand-red text-white flex items-center justify-center shadow"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
                 <Camera className="w-8 h-8 text-teal-500 mx-auto mb-2" />
                 <p className="font-semibold text-sm text-[#0B1C2E]">Tap to take / upload photos</p>
                 <p className="text-xs text-gray-400 mt-0.5">JPG, PNG Â· Multiple allowed</p>
@@ -153,38 +196,46 @@ export default function PodCapturePage() {
           </div>
 
           {/* Signature */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+          <div className="bg-white border border-gray-100 shadow-sm p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-sm text-[#0B1C2E]">Receiver Signature <span className="text-red-500">*</span></h3>
+              <h3 className="font-black text-sm text-brand-black font-display uppercase tracking-wide">
+                Receiver Signature <span className="text-brand-red">*</span>
+              </h3>
               <button
                 onClick={clearSig}
-                className="flex items-center gap-1 text-xs text-gray-500 font-medium px-2.5 py-1.5 rounded-lg bg-gray-100 active:scale-95 transition-transform"
+                className="flex items-center gap-1 text-xs text-gray-500 font-medium px-2.5 py-1.5 bg-gray-100 active:scale-95 transition-transform min-h-[36px]"
               >
                 <RotateCcw className="w-3 h-3" /> Clear
               </button>
             </div>
-            <div className="border-2 border-dashed border-gray-200 rounded-xl overflow-hidden bg-white">
+            <div className="border-2 border-dashed border-gray-200 overflow-hidden bg-white">
               <SignatureCanvas
                 ref={sigRef}
                 canvasProps={{ className: "w-full", style: { height: 180, width: "100%", display: "block" } }}
-                penColor="#0B1220"
+                penColor="#111111"
               />
             </div>
             <div className="flex items-center gap-1.5 text-xs text-gray-400 mt-2">
               <MapPin className="w-3 h-3" />
-              GPS: {trip.dropoff.lat.toFixed(4)}, {trip.dropoff.lng.toFixed(4)} Â· Auto-timestamped
+              GPS: {trip.dropoff.lat.toFixed(4)}, {trip.dropoff.lng.toFixed(4)} &middot; Auto-timestamped
             </div>
           </div>
+        </div>
         </main>
 
-        {/* Sticky submit */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 max-w-sm mx-auto px-4 pb-6 pt-3 bg-white/95 backdrop-blur-md border-t border-gray-100">
-          <button
-            onClick={submit}
-            className="w-full h-14 bg-[#0B6E4F] hover:bg-[#0a5f44] active:scale-[0.98] text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-teal-900/20"
-          >
-            <CheckCircle2 className="w-5 h-5" /> Save Proof of Delivery
-          </button>
+        {/* Sticky submit footer */}
+        <div
+          className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 px-4 pt-3"
+          style={{ paddingBottom: "max(env(safe-area-inset-bottom), 16px)" }}
+        >
+          <div className="max-w-lg mx-auto">
+            <button
+              onClick={submit}
+              className="w-full h-14 bg-brand-red hover:bg-brand-red-dark active:scale-[0.98] text-white font-black text-sm font-display uppercase tracking-wide flex items-center justify-center gap-2 transition-all"
+            >
+              <CheckCircle2 className="w-5 h-5" /> Save Proof of Delivery
+            </button>
+          </div>
         </div>
       </div>
     );

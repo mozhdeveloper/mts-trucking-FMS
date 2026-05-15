@@ -1,17 +1,19 @@
-"use client";
-import { useState } from "react";
+﻿"use client";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/auth";
 import { useTripStore, useFleetStore, useDriverStore, useClientStore, useUiStore } from "@/lib/store";
 import {
   Bell, ChevronLeft, ChevronRight, LayoutGrid, ClipboardList, Camera,
-  MoreHorizontal, Truck, Package, Navigation2, Clock3, CheckCircle2,
-  MessageSquare, Wallet, Megaphone, Fuel, X, MapPin, PhoneCall,
-  AlertTriangle, Star, TrendingUp,
+  Truck, Package, Navigation2, Clock3, CheckCircle2,
+  MessageSquare, Wallet, Megaphone, Fuel, X, MapPin,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { TripStatus, Trip } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { DriverNav } from "@/components/driver/DriverNav";
+import type { DriverTab } from "@/components/driver/DriverNav";
+import { DriverSidebar } from "@/components/driver/DriverSidebar";
 import { Logo } from "@/components/Brand/Logo";
 
 // â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -54,7 +56,6 @@ const SHEET_STATUSES: { value: TripStatus; label: string }[] = [
 ];
 
 type View = "dashboard" | "trip_details" | "trips_list";
-type Tab  = "dashboard" | "trips" | "pod" | "more";
 
 // â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function DriverPage() {
@@ -69,10 +70,18 @@ export default function DriverPage() {
 
   const [view,          setView]         = useState<View>("dashboard");
   const [selectedTrip,  setSelectedTrip] = useState<Trip | null>(null);
-  const [activeTab,     setActiveTab]    = useState<Tab>("dashboard");
+  const [activeTab,     setActiveTab]    = useState<DriverTab>("dashboard");
+  const [sidebarOpen,   setSidebarOpen]  = useState(false);
   const [showSheet,     setShowSheet]    = useState(false);
   const [sheetStatus,   setSheetStatus]  = useState<TripStatus>("in_transit");
   const [sheetNote,     setSheetNote]    = useState("");
+
+  // Read ?view= query param to deep-link into trips list from other pages
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const v = params.get("view");
+    if (v === "trips") { setView("trips_list"); setActiveTab("trips"); }
+  }, []);
 
   // Resolve driver â€” fall back to first driver (Mark Santos) for demo
   const driverId = user?.driverId ?? drivers[0]?.id;
@@ -108,12 +117,12 @@ export default function DriverPage() {
     setSheetNote("");
   }
 
-  function handleTab(tab: Tab) {
+  function handleTab(tab: DriverTab) {
+    if (tab === "pod")      { router.push("/pod"); return; }
+    if (tab === "settings") { router.push("/driver/settings"); return; }
     setActiveTab(tab);
-    if (tab === "dashboard") { setView("dashboard"); return; }
-    if (tab === "trips")     { setView("trips_list"); return; }
-    if (tab === "pod")       { router.push("/pod"); return; }
-    toast.info("Coming soon");
+    if (tab === "dashboard") { setView("dashboard"); }
+    if (tab === "trips")     { setView("trips_list"); }
   }
 
   // â”€â”€â”€ Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -121,17 +130,21 @@ export default function DriverPage() {
     return (
       <div className="space-y-5 pb-24">
         {/* Profile banner */}
-        <div className="-mx-4 -mt-4 px-5 pt-6 pb-6 bg-brand-navy">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-brand-gradient flex items-center justify-center text-white text-xl font-bold shrink-0 select-none">
+        <div className="-mx-4 -mt-4 px-5 pt-6 pb-6 bg-brand-black relative overflow-hidden">
+          {/* Chevron texture */}
+          <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(227,0,15,0.06) 0 1px, transparent 1px 12px)" }} />
+          {/* Bottom red accent */}
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-brand-red" />
+          <div className="relative flex items-center gap-4">
+            <div className="w-14 h-14 bg-brand-red flex items-center justify-center text-white text-xl font-black font-display shrink-0 select-none">
               {fullName.charAt(0)}
             </div>
             <div>
-              <p className="text-sm text-white/60">{greeting},</p>
-              <p className="text-lg font-bold text-white leading-tight">{fullName}</p>
+              <p className="text-xs text-white/50 font-sans">{greeting},</p>
+              <p className="text-lg font-black text-white font-display uppercase leading-tight">{fullName}</p>
               <div className="flex items-center gap-1.5 mt-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-xs text-white/60">Online</span>
+                <span className="w-2 h-2 bg-emerald-400 animate-pulse" />
+                <span className="text-xs text-white/50 font-sans">Online</span>
               </div>
             </div>
           </div>
@@ -141,7 +154,7 @@ export default function DriverPage() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-bold text-brand-navy text-sm">Today's Summary</h2>
-              <button className="text-xs text-brand-teal font-semibold min-h-[44px] px-2">View all</button>
+              <button className="text-xs text-brand-red font-black font-display uppercase tracking-wider min-h-[44px] px-2">View all</button>
           </div>
           <div className="grid grid-cols-4 gap-2">
             {([
@@ -210,7 +223,7 @@ export default function DriverPage() {
               <div className="px-4 pb-4 pt-2">
                 <button
                   onClick={() => openTrip(activeTrip)}
-                  className="w-full min-h-[52px] bg-brand-teal hover:opacity-90 active:scale-[0.98] text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all"
+                  className="w-full min-h-[52px] bg-brand-red hover:bg-brand-red-dark active:scale-[0.98] text-white font-black text-sm font-display uppercase tracking-wide flex items-center justify-center gap-2 transition-all"
                 >
                   View Trip Details <ChevronRight className="w-4 h-4" />
                 </button>
@@ -279,8 +292,8 @@ export default function DriverPage() {
                     {a.badge}
                   </span>
                 )}
-                <div className="w-9 h-9 bg-brand-teal/10 rounded-xl flex items-center justify-center">
-                  <a.icon className="w-4 h-4 text-brand-teal" />
+                <div className="w-9 h-9 bg-brand-red-light flex items-center justify-center">
+                  <a.icon className="w-4 h-4 text-brand-red" />
                 </div>
                 <span className="text-[10px] text-gray-600 font-medium leading-tight whitespace-pre-line">{a.label}</span>
               </button>
@@ -292,7 +305,7 @@ export default function DriverPage() {
         <section>
           <div className="flex items-center justify-between mb-3">
               <h2 className="font-bold text-brand-navy text-sm">Announcements</h2>
-            <button className="text-xs text-brand-teal font-semibold min-h-[44px] px-2">View all</button>
+            <button className="text-xs text-brand-red font-black font-display uppercase tracking-wider min-h-[44px] px-2">View all</button>
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-start gap-3">
             <div className="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center shrink-0">
@@ -461,10 +474,10 @@ export default function DriverPage() {
 
         {/* Map placeholder */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="h-40 bg-gradient-to-br from-brand-teal/5 via-brand-teal/10 to-blue-50 flex flex-col items-center justify-center gap-2 text-gray-500">
-            <Navigation2 className="w-8 h-8 text-brand-teal" />
-            <span className="text-xs font-medium text-gray-600">Live GPS coming soon</span>
-            <span className="text-[10px] text-gray-400 px-6 text-center">{trip.pickup.address} â†’ {trip.dropoff.address}</span>
+          <div className="h-40 bg-gray-50 border border-gray-100 flex flex-col items-center justify-center gap-2 text-gray-400">
+            <Navigation2 className="w-8 h-8 text-brand-red/40" />
+            <span className="text-xs font-medium text-gray-500">Live GPS coming soon</span>
+            <span className="text-[10px] text-gray-400 px-6 text-center">{trip.pickup.address} &rarr; {trip.dropoff.address}</span>
           </div>
         </div>
 
@@ -472,7 +485,7 @@ export default function DriverPage() {
         {isActive && !["completed","cancelled"].includes(trip.status) && (
           <button
             onClick={openStatusSheet}
-            className="w-full h-14 bg-brand-teal hover:opacity-90 active:scale-[0.98] text-white rounded-2xl font-bold text-sm flex items-center justify-center transition-all shadow-lg shadow-brand-navy/20"
+              className="w-full h-14 bg-brand-red hover:bg-brand-red-dark active:scale-[0.98] text-white font-black text-sm font-display uppercase tracking-wide flex items-center justify-center transition-all"
           >
             Update Trip Status
           </button>
@@ -484,7 +497,7 @@ export default function DriverPage() {
           <div className="space-y-3">
             {/* Driver row */}
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full bg-brand-gradient flex items-center justify-center text-white font-bold shrink-0">
+              <div className="w-11 h-11 bg-brand-red flex items-center justify-center text-white font-black font-display shrink-0">
                 {fullName.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
@@ -493,9 +506,9 @@ export default function DriverPage() {
               </div>
               <button
                 onClick={() => toast.info("Chat coming soon")}
-                className="w-9 h-9 rounded-full bg-brand-teal/10 flex items-center justify-center active:scale-95 transition-transform"
+                className="w-9 h-9 bg-brand-red-light flex items-center justify-center active:scale-95 transition-transform"
               >
-                <MessageSquare className="w-4 h-4 text-brand-teal" />
+                <MessageSquare className="w-4 h-4 text-brand-red" />
               </button>
             </div>
             {/* Vehicle row */}
@@ -567,7 +580,7 @@ export default function DriverPage() {
       >
         <div className="max-w-lg mx-auto h-14 px-4 flex items-center justify-between">
           <button
-            onClick={() => toast.info("Menu")}
+            onClick={() => setSidebarOpen(true)}
             className="min-w-[44px] min-h-[44px] flex flex-col justify-center items-start gap-1.5 p-2 -ml-2"
             aria-label="Menu"
           >
@@ -576,7 +589,9 @@ export default function DriverPage() {
             <span className="block w-3.5 h-0.5 bg-white rounded" />
           </button>
 
-          <Logo size={28} light showWordmark={false} />
+          <div className="select-none">
+            <Logo size={32} light showWordmark wordmarkSize="sm" />
+          </div>
 
           <button
             onClick={() => toast.info("Notifications")}
@@ -619,33 +634,13 @@ export default function DriverPage() {
         </div>
       </main>
 
-      {/* â”€â”€ Bottom nav â”€â”€ */}
-      <nav
-        className="sticky bottom-0 z-30 bg-white border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.07)] shrink-0"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-      >
-        <div className="max-w-lg mx-auto h-16 flex items-center">
-          {([
-            { id: "dashboard", label: "Dashboard", icon: LayoutGrid },
-            { id: "trips",     label: "Trips",     icon: ClipboardList },
-            { id: "pod",       label: "POD",        icon: Camera },
-            { id: "more",      label: "More",       icon: MoreHorizontal },
-          ] as const).map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => handleTab(id)}
-              className={cn(
-                "flex-1 flex flex-col items-center justify-center gap-1 h-full min-h-[44px] transition-colors",
-                activeTab === id ? "text-brand-teal" : "text-gray-400"
-              )}
-              aria-label={label}
-            >
-              <Icon className={cn("w-5 h-5 transition-transform", activeTab === id && "scale-110")} />
-              <span className="text-[10px] font-medium">{label}</span>
-            </button>
-          ))}
-        </div>
-      </nav>
+      <DriverNav active={activeTab} />
+
+      <DriverSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        active={activeTab}
+      />
 
       {/* â”€â”€ Update Status Bottom Sheet â”€â”€ */}
       {showSheet && activeTrip && (
@@ -655,7 +650,7 @@ export default function DriverPage() {
             onClick={() => setShowSheet(false)}
           />
           <div
-            className="relative bg-white rounded-t-2xl px-5 pt-3 w-full max-w-lg mx-auto shadow-2xl"
+            className="relative bg-white rounded-t-3xl px-5 pt-3 w-full max-w-lg mx-auto shadow-2xl"
             style={{ paddingBottom: "max(env(safe-area-inset-bottom), 24px)" }}
           >
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
@@ -677,21 +672,19 @@ export default function DriverPage() {
                   key={value}
                   onClick={() => setSheetStatus(value)}
                   className={cn(
-                    "w-full flex items-center gap-3 p-4 rounded-md border text-left transition-colors min-h-[56px]",
+                    "w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-colors min-h-[56px]",
                     sheetStatus === value
                       ? "border-brand-teal bg-brand-teal/5"
                       : "border-gray-100 bg-gray-50 active:bg-gray-100"
                   )}
                 >
                   <div className={cn(
-                    "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
-                    sheetStatus === value ? "border-brand-teal" : "border-gray-300"
-                  )}>
-                    {sheetStatus === value && <span className="w-2.5 h-2.5 rounded-full bg-brand-teal" />}
-                  </div>
+                    "w-2.5 h-2.5 flex-shrink-0",
+                    sheetStatus === value ? "bg-brand-red" : "bg-gray-300"
+                  )} />
                   <span className={cn(
-                    "text-sm font-medium",
-                    sheetStatus === value ? "text-brand-teal" : "text-gray-600"
+                    "text-sm font-bold font-display uppercase tracking-wide",
+                    sheetStatus === value ? "text-brand-red" : "text-gray-600"
                   )}>
                     {label}
                   </span>
@@ -704,12 +697,12 @@ export default function DriverPage() {
               placeholder="Add notes (optional)"
               value={sheetNote}
               onChange={(e) => setSheetNote(e.target.value)}
-              className="w-full text-sm border border-gray-200 rounded-xl px-3 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-brand-teal/40 text-gray-700 placeholder:text-gray-400"
+              className="w-full text-sm border border-gray-200 px-3 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-brand-red/30 text-gray-700 placeholder:text-gray-400"
             />
             <p className="text-[10px] text-gray-400 text-right mb-4">{sheetNote.length}/200</p>
             <button
               onClick={submitStatus}
-              className="w-full min-h-[56px] bg-brand-teal hover:opacity-90 active:scale-[0.98] text-white rounded-md font-bold text-sm flex items-center justify-center transition-all shadow-lg"
+              className="w-full min-h-[56px] bg-brand-red hover:bg-brand-red-dark active:scale-[0.98] text-white font-black text-sm font-display uppercase tracking-wide flex items-center justify-center transition-all"
             >
               Submit Update
             </button>

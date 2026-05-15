@@ -56,7 +56,7 @@ export const useFleetStore = create<FleetState>()(
       deleteVehicle: (id) => set((s) => ({ vehicles: s.vehicles.filter((v) => v.id !== id) })),
       reset: () => set({ vehicles: seedVehicles }),
     }),
-    { name: "mts-fleet" }
+    { name: "nex-fleet" }
   )
 );
 
@@ -81,7 +81,7 @@ export const useDriverStore = create<DriverState>()(
       deleteDriver: (id) => set((s) => ({ drivers: s.drivers.filter((x) => x.id !== id) })),
       reset: () => set({ drivers: seedDrivers }),
     }),
-    { name: "mts-drivers" }
+    { name: "nex-drivers" }
   )
 );
 
@@ -108,7 +108,7 @@ export const useClientStore = create<ClientState>()(
       deleteClient: (id) => set((s) => ({ clients: s.clients.filter((x) => x.id !== id) })),
       reset: () => set({ clients: seedClients }),
     }),
-    { name: "mts-clients" }
+    { name: "nex-clients" }
   )
 );
 
@@ -119,6 +119,10 @@ interface TripState {
   setStatus: (id: string, status: TripStatus, by?: string, note?: string) => void;
   approveTrip: (id: string, by: string) => void;
   rejectTrip: (id: string, by: string, reason?: string) => void;
+  // Phase 5 — Super Admin rate-confirmation gate at trip creation
+  submitForRateApproval: (id: string) => void;
+  approveRates: (id: string, by: string, notes?: string) => void;
+  rejectRates: (id: string, by: string, reason?: string) => void;
   lockTripsToPeriod: (ids: string[], periodId: string) => void;
   deleteTrip: (id: string) => void;
   reset: () => void;
@@ -129,8 +133,15 @@ export const useTripStore = create<TripState>()(
       trips: seedTrips,
       addTrip: (t) => {
         const id = `TRP-2026-${Math.floor(Math.random() * 900 + 100)}`;
+        // Back-compat: mirror legacy consignee* fields onto customer* if caller passed only one form.
+        const customerName    = t.customerName    ?? t.consigneeName;
+        const customerContact = t.customerContact ?? t.consigneeContact;
         const trip: Trip = {
           ...t,
+          customerName,
+          customerContact,
+          consigneeName:    customerName,    // mirror back for any legacy reader
+          consigneeContact: customerContact,
           id,
           createdAt: new Date().toISOString(),
           statusLogs: [{ status: t.status, at: new Date().toISOString(), by: "system" }],
@@ -166,6 +177,45 @@ export const useTripStore = create<TripState>()(
               : t
           ),
         })),
+      // ── Phase 5 rate-approval gate ──
+      submitForRateApproval: (id) =>
+        set((s) => ({
+          trips: s.trips.map((t) =>
+            t.id === id
+              ? { ...t, approvalStatus: "pending_rate_approval" }
+              : t
+          ),
+        })),
+      approveRates: (id, by, notes) =>
+        set((s) => ({
+          trips: s.trips.map((t) =>
+            t.id === id
+              ? {
+                  ...t,
+                  approvalStatus: "approved",
+                  rateApprovedBy: by,
+                  rateApprovedAt: new Date().toISOString(),
+                  rateApprovalNotes: notes,
+                  statusLogs: [...t.statusLogs, { status: t.status, at: new Date().toISOString(), by, note: `Rates approved${notes ? `: ${notes}` : ""}` }],
+                }
+              : t
+          ),
+        })),
+      rejectRates: (id, by, reason) =>
+        set((s) => ({
+          trips: s.trips.map((t) =>
+            t.id === id
+              ? {
+                  ...t,
+                  approvalStatus: "rejected",
+                  rateApprovedBy: by,
+                  rateApprovedAt: new Date().toISOString(),
+                  rateApprovalNotes: reason,
+                  statusLogs: [...t.statusLogs, { status: t.status, at: new Date().toISOString(), by, note: `Rates rejected: ${reason ?? ""}` }],
+                }
+              : t
+          ),
+        })),
       lockTripsToPeriod: (ids, periodId) =>
         set((s) => ({
           trips: s.trips.map((t) => (ids.includes(t.id) ? { ...t, payrollProcessed: true, payrollPeriodId: periodId } : t)),
@@ -173,7 +223,7 @@ export const useTripStore = create<TripState>()(
       deleteTrip: (id) => set((s) => ({ trips: s.trips.filter((t) => t.id !== id) })),
       reset: () => set({ trips: seedTrips }),
     }),
-    { name: "mts-trips" }
+    { name: "nex-trips" }
   )
 );
 
@@ -198,7 +248,7 @@ export const useMaintenanceStore = create<MaintenanceState>()(
       deleteRecord: (id) => set((s) => ({ records: s.records.filter((x) => x.id !== id) })),
       reset: () => set({ records: seedMaintenance }),
     }),
-    { name: "mts-maintenance" }
+    { name: "nex-maintenance" }
   )
 );
 
@@ -220,7 +270,7 @@ export const useExpenseStore = create<ExpenseState>()(
       deleteExpense: (id) => set((s) => ({ expenses: s.expenses.filter((x) => x.id !== id) })),
       reset: () => set({ expenses: seedExpenses }),
     }),
-    { name: "mts-expenses" }
+    { name: "nex-expenses" }
   )
 );
 
@@ -243,7 +293,7 @@ export const usePayrollStore = create<PayrollState>()(
         set((s) => ({ records: s.records.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
       reset: () => set({ records: seedPayroll }),
     }),
-    { name: "mts-payroll" }
+    { name: "nex-payroll" }
   )
 );
 
@@ -267,7 +317,7 @@ export const usePodStore = create<PodState>()(
       },
       reset: () => set({ pods: [] }),
     }),
-    { name: "mts-pods" }
+    { name: "nex-pods" }
   )
 );
 
@@ -301,7 +351,7 @@ export const useUiStore = create<UiState>()(
         set((s) => ({ notifications: s.notifications.map((n) => ({ ...n, read: true })) })),
       insights: seedAiInsights,
     }),
-    { name: "mts-ui" }
+    { name: "nex-ui" }
   )
 );
 // ─── Billing Stores ──────────────────────────────────────────
@@ -327,7 +377,7 @@ export const useInvoiceStore = create<InvoiceState>()(
       deleteInvoice: (id) => set((s) => ({ invoices: s.invoices.filter((x) => x.id !== id) })),
       reset: () => set({ invoices: seedInvoices }),
     }),
-    { name: "mts-invoices" }
+    { name: "nex-invoices" }
   )
 );
 
@@ -352,7 +402,7 @@ export const useBillingPaymentStore = create<BillingPaymentState>()(
       deletePayment: (id) => set((s) => ({ payments: s.payments.filter((x) => x.id !== id) })),
       reset: () => set({ payments: seedBillingPayments }),
     }),
-    { name: "mts-billing-payments" }
+    { name: "nex-billing-payments" }
   )
 );
 
@@ -377,7 +427,7 @@ export const useCreditNoteStore = create<CreditNoteState>()(
       deleteCreditNote: (id) => set((s) => ({ creditNotes: s.creditNotes.filter((x) => x.id !== id) })),
       reset: () => set({ creditNotes: seedCreditNotes }),
     }),
-    { name: "mts-credit-notes" }
+    { name: "nex-credit-notes" }
   )
 );
 
@@ -402,33 +452,35 @@ export const useRecurringInvoiceStore = create<RecurringInvoiceState>()(
       deleteRecurring: (id) => set((s) => ({ recurring: s.recurring.filter((x) => x.id !== id) })),
       reset: () => set({ recurring: seedRecurringInvoices }),
     }),
-    { name: "mts-recurring" }
+    { name: "nex-recurring" }
   )
 );
 
 export function resetAllDemoData() {
   if (typeof window === "undefined") return;
   [
-    "mts-fleet",
-    "mts-drivers",
-    "mts-clients",
-    "mts-trips",
-    "mts-maintenance",
-    "mts-expenses",
-    "mts-payroll",
-    "mts-pods",
-    "mts-ui",
-    "mts-auth",
-    "mts-invoices",
-    "mts-billing-payments",
-    "mts-credit-notes",
-    "mts-recurring",
-    "mts-trip-rates",
-    "mts-driver-payroll-profiles",
-    "mts-incentives",
-    "mts-deductions",
-    "mts-payroll-periods",
-    "mts-partners",
+    "nex-fleet",
+    "nex-drivers",
+    "nex-clients",
+    "nex-trips",
+    "nex-maintenance",
+    "nex-expenses",
+    "nex-payroll",
+    "nex-pods",
+    "nex-ui",
+    "nex-auth",
+    "nex-invoices",
+    "nex-billing-payments",
+    "nex-credit-notes",
+    "nex-recurring",
+    "nex-trip-rates",
+    "nex-driver-payroll-profiles",
+    "nex-incentives",
+    "nex-deductions",
+    "nex-payroll-periods",
+    "nex-partners",
+    "nex-helpers",
+    "nex-calendar",
   ].forEach((k) => localStorage.removeItem(k));
   window.location.reload();
 }
@@ -448,3 +500,9 @@ export {
 
 // Subcon partners
 export { usePartnerStore } from "./partners";
+
+// Helpers (Phase 1)
+export { useHelperStore } from "./helpers";
+
+// Department Calendar (Phase 6)
+export { useCalendarStore } from "./calendar";
