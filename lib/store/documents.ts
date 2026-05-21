@@ -1,5 +1,6 @@
-import { create } from "zustand";
+﻿import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { BRAND } from "@/lib/config/brand";
 
 export type AccessLevel = "public" | "internal" | "private";
 export type DocumentStatus = "active" | "archived" | "deleted";
@@ -115,10 +116,10 @@ const DUMMY_DOCUMENTS: DocumentItem[] = [
 ];
 
 const DUMMY_REQUESTS: DocumentRequest[] = [
-  { id: "r1", title: "Driver License Renewal", requestedFrom: "Driver Juan", requestedFromEmail: "driver.juan@mtstrucking.demo", notes: "Please provide updated license scanned copy.", dueDate: "2024-06-15", status: "pending", createdAt: "2024-05-31T10:30:00Z", priority: "high" },
+  { id: "r1", title: "Driver License Renewal", requestedFrom: "Driver Juan", requestedFromEmail: "driver.juan@nexlogistics.demo", notes: "Please provide updated license scanned copy.", dueDate: "2024-06-15", status: "pending", createdAt: "2024-05-31T10:30:00Z", priority: "high" },
   { id: "r2", title: "Updated Vendor Agreement", requestedFrom: "Fuel Corp.", requestedFromEmail: "contracts@fuelcorp.example", notes: "2024 revised vendor agreement with updated rates.", dueDate: "2024-06-01", status: "completed", createdAt: "2024-05-28T14:15:00Z", priority: "medium" },
   { id: "r3", title: "Insurance Policy 2024", requestedFrom: "ABC Construction Inc.", requestedFromEmail: "abccorp@example.com", notes: "Annual insurance policy renewal document.", dueDate: "2024-06-10", status: "pending", createdAt: "2024-05-25T11:20:00Z", priority: "high" },
-  { id: "r4", title: "Vehicle Registration - TRK-001", requestedFrom: "Kevin Tan", requestedFromEmail: "kevin.tan@mtstrucking.demo", notes: "Annual vehicle registration renewal for fleet truck #001.", dueDate: "2024-06-20", status: "overdue", createdAt: "2024-05-20T09:00:00Z", priority: "medium" },
+  { id: "r4", title: "Vehicle Registration - TRK-001", requestedFrom: "Kevin Tan", requestedFromEmail: "kevin.tan@nexlogistics.demo", notes: "Annual vehicle registration renewal for fleet truck #001.", dueDate: "2024-06-20", status: "overdue", createdAt: "2024-05-20T09:00:00Z", priority: "medium" },
   { id: "r5", title: "Signed Delivery Receipt - TRP-000201", requestedFrom: "XYZ Corp", requestedFromEmail: "xyzops@example.com", notes: "Original signed POD for trip TRP-000201.", dueDate: "2024-06-05", status: "cancelled", createdAt: "2024-05-18T15:45:00Z", priority: "low" },
 ];
 
@@ -176,6 +177,6 @@ export const useDocumentStore = create<DocumentStore>()(
       })),
       reset: () => set({ documents: DUMMY_DOCUMENTS, categories: DUMMY_CATEGORIES, requests: DUMMY_REQUESTS }),
     }),
-    { name: "mts-documents" }
+    { name: `${BRAND.storeKey}-documents` }
   )
 );

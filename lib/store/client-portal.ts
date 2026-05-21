@@ -1,6 +1,6 @@
-"use client";
-import { create } from "zustand";
+﻿import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { BRAND } from "@/lib/config/brand";
 
 export type PortalShipmentStatus = "in_transit" | "delivered" | "pending" | "exception";
 export type PortalInvoiceStatus = "paid" | "unpaid" | "overdue";
@@ -89,7 +89,7 @@ interface ClientPortalState {
 const SEEDED_SHIPMENTS: PortalShipment[] = [
   {
     id: "sh-1",
-    trackingNumber: "MTS-TRK-000124",
+    trackingNumber: "NEX-TRK-000124",
     origin: "Los Angeles, CA",
     destination: "Phoenix, AZ",
     status: "in_transit",
@@ -101,7 +101,7 @@ const SEEDED_SHIPMENTS: PortalShipment[] = [
   },
   {
     id: "sh-2",
-    trackingNumber: "MTS-TRK-000123",
+    trackingNumber: "NEX-TRK-000123",
     origin: "Houston, TX",
     destination: "Dallas, TX",
     status: "in_transit",
@@ -113,7 +113,7 @@ const SEEDED_SHIPMENTS: PortalShipment[] = [
   },
   {
     id: "sh-3",
-    trackingNumber: "MTS-TRK-000122",
+    trackingNumber: "NEX-TRK-000122",
     origin: "Chicago, IL",
     destination: "Detroit, MI",
     status: "delivered",
@@ -126,7 +126,7 @@ const SEEDED_SHIPMENTS: PortalShipment[] = [
   },
   {
     id: "sh-4",
-    trackingNumber: "MTS-TRK-000121",
+    trackingNumber: "NEX-TRK-000121",
     origin: "Miami, FL",
     destination: "Atlanta, GA",
     status: "delivered",
@@ -139,7 +139,7 @@ const SEEDED_SHIPMENTS: PortalShipment[] = [
   },
   {
     id: "sh-5",
-    trackingNumber: "MTS-TRK-000120",
+    trackingNumber: "NEX-TRK-000120",
     origin: "Seattle, WA",
     destination: "Portland, OR",
     status: "pending",
@@ -158,7 +158,7 @@ const SEEDED_DOCUMENTS: PortalDocument[] = [
     type: "PDF",
     category: "Delivery",
     uploadedAt: "2026-05-30T09:10:00.000Z",
-    uploadedBy: "MTS-TRK-000124",
+    uploadedBy: "NEX-TRK-000124",
     sizeKb: 821,
     isNew: true,
     notes: "Signed by receiving supervisor",
@@ -169,7 +169,7 @@ const SEEDED_DOCUMENTS: PortalDocument[] = [
     type: "DOCX",
     category: "Delivery",
     uploadedAt: "2026-05-30T08:42:00.000Z",
-    uploadedBy: "MTS-TRK-000123",
+    uploadedBy: "NEX-TRK-000123",
     sizeKb: 302,
   },
   {
@@ -178,7 +178,7 @@ const SEEDED_DOCUMENTS: PortalDocument[] = [
     type: "XLSX",
     category: "Compliance",
     uploadedAt: "2026-05-29T16:15:00.000Z",
-    uploadedBy: "MTS-TRK-000122",
+    uploadedBy: "NEX-TRK-000122",
     sizeKb: 268,
   },
   {
@@ -187,7 +187,7 @@ const SEEDED_DOCUMENTS: PortalDocument[] = [
     type: "PDF",
     category: "Rate",
     uploadedAt: "2026-05-28T14:05:00.000Z",
-    uploadedBy: "MTS-TRK-000121",
+    uploadedBy: "NEX-TRK-000121",
     sizeKb: 442,
   },
   {
@@ -252,7 +252,7 @@ const SEEDED_INVOICES: PortalInvoice[] = [
 const SEEDED_TICKETS: PortalTicket[] = [
   {
     id: "tkt-1",
-    subject: "Shipment delay on MTS-TRK-000123",
+    subject: "Shipment delay on NEX-TRK-000123",
     details: "Please provide updated ETA and reason for the delay warning seen this morning.",
     category: "Shipment",
     priority: "high",
@@ -379,6 +379,6 @@ export const useClientPortalStore = create<ClientPortalState>()(
           preferences: SEEDED_PREFERENCES,
         }),
     }),
-    { name: "mts-client-portal" }
+    { name: `${BRAND.storeKey}-client-portal` }
   )
 );
