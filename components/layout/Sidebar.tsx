@@ -6,9 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronDown, Building2, FileText, CloudUpload, FolderTree, Share2, FileQuestion, Trash2 } from "lucide-react";
 import { useUiStore } from "@/lib/store";
 import { useAuthStore } from "@/lib/store/auth";
+import { useFeatureStore } from "@/lib/store/features";
 import { navForRole, ROLE_LABEL } from "@/lib/auth/roles";
 import { Badge } from "@/components/ui/badge";
-import { Logo } from "@/components/Brand/Logo";
 import { cn } from "@/lib/utils";
 import {
   LayoutGrid,
@@ -39,7 +39,12 @@ export function Sidebar() {
   const toggle = useUiStore((s) => s.toggleSidebar);
   const user = useAuthStore((s) => s.user);
   const company = useAuthStore((s) => s.company);
-  const items = navForRole(user?.role);
+  const { isEnabled } = useFeatureStore();
+
+  // Filter by role then by feature flags (platform owner sees all regardless)
+  const items = navForRole(user?.role).filter(
+    (item) => !item.featureKey || user?.isPlatformOwner || isEnabled(item.featureKey)
+  );
 
   return (
     <aside
@@ -51,10 +56,18 @@ export function Sidebar() {
       {/* Header */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-white/5 shrink-0">
         <Link href="/dashboard" className="flex items-center gap-2.5">
-          {collapsed ? (
-            <Logo size={36} showWordmark={false} light />
-          ) : (
-            <Logo size={36} wordmarkSize="sm" light />
+          <div className="w-9 h-9 rounded-lg bg-brand-teal flex items-center justify-center shadow-glow shrink-0">
+            <span className="font-extrabold text-lg text-brand-navy">N</span>
+          </div>
+          {!collapsed && (
+            <div className="leading-none">
+              <div className="text-lg font-extrabold tracking-tight">
+                NE<span className="text-brand-teal">X</span>
+              </div>
+              <div className="text-[9px] tracking-[0.3em] text-brand-teal/90 font-semibold mt-0.5">
+                LOGISTICS
+              </div>
+            </div>
           )}
         </Link>
         <button
@@ -153,7 +166,7 @@ export function Sidebar() {
             </div>
             {user && (
               <div className="mt-2 px-1 text-[10px] text-white/40 truncate">
-                {ROLE_LABEL[user.role]} Â· {user.email}
+                {ROLE_LABEL[user.role]} · {user.email}
               </div>
             )}
           </motion.div>
@@ -163,7 +176,7 @@ export function Sidebar() {
   );
 }
 
-/* â”€â”€ Expandable Sub-Nav â”€â”€ */
+/* ── Expandable Sub-Nav ── */
 const BILLING_CHILDREN = [
   { label: "Overview", href: "/billing", icon: LayoutGrid },
   { label: "Invoices", href: "/billing/invoices", icon: InvoiceIcon },
