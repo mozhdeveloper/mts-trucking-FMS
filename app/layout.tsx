@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Roboto, Montserrat } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
+import { BRAND } from "@/lib/config/brand";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 
@@ -10,39 +11,26 @@ const inter = Inter({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const roboto = Roboto({
-  subsets: ["latin"],
-  variable: "--font-roboto",
-  weight: ["400", "500", "700"],
-});
-
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  variable: "--font-montserrat",
-  weight: ["600", "700", "800", "900"],
-});
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#E3000F" },
-    { media: "(prefers-color-scheme: dark)",  color: "#B00009" },
+    { media: "(prefers-color-scheme: light)", color: "#0B1220" },
+    { media: "(prefers-color-scheme: dark)",  color: "#0B1220" },
   ],
 };
 
 export const metadata: Metadata = {
-  title: "MTS Trucking Incorporated — Fleet, Trip & Payroll Management",
-  description:
-    "Industrial-grade logistics, fleet, dispatch, GPS tracking, payroll and analytics platform by MTS Trucking Incorporated.",
+  title: `${BRAND.title} — ${BRAND.tagline}`,
+  description: BRAND.description,
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
   },
   openGraph: {
-    title: "MTS Trucking Incorporated",
-    description: "Enterprise Fleet & Trip Management by MTS Trucking Incorporated",
+    title: BRAND.title,
+    description: `${BRAND.tagline} by ${BRAND.vendor}`,
     type: "website",
   },
 };
@@ -52,19 +40,17 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Pre-hydration theme detection — runs before React mounts to prevent FOUC.
+  // Inline script with no user input; safe by construction. Errors are caught
+  // because localStorage may be unavailable (private browsing) or contain
+  // invalid JSON; in either case we fall back to light mode silently.
+  const themeKey = `${BRAND.storeKey}-ui`;
+  const themeScript = `try{var u=JSON.parse(localStorage.getItem(${JSON.stringify(themeKey)})||'{}');if(u&&u.state&&u.state.darkMode){document.documentElement.classList.add('dark')}}catch(_){}`;
+
   return (
-    <html lang="en" className={`${inter.variable} ${roboto.variable} ${montserrat.variable}`} suppressHydrationWarning>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                const ui = JSON.parse(localStorage.getItem('mts-ui') || '{}');
-                if (ui?.state?.darkMode) document.documentElement.classList.add('dark');
-              } catch(e) {}
-            `,
-          }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="font-sans">
         {children}
@@ -73,7 +59,7 @@ export default function RootLayout({
           richColors
           toastOptions={{
             style: {
-              borderRadius: "2px",
+              borderRadius: "12px",
               fontFamily: "var(--font-inter)",
             },
           }}
